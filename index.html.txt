@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>EcoAudit – Smart Energy Efficiency</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    :root {
+      --green-dark: #035f3f;
+      --green-main: #0fbf6b;
+      --green-light: #e4f8ed;
+      --bg-dark: #041b16;
+      --text-main: #102318;
+      --text-muted: #5f7465;
+      --white: #ffffff;
+      --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.12);
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-pill: 999px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at top left, #083b2a 0, #020c0a 55%, #000 100%);
+      color: var(--white);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }
+
+    /* HEADER */
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+    }
+
+    .logo-badge {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      background: radial-gradient(circle at 30% 0, #82ffd3 0, #14c86d 50%, #035f3f 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 16px rgba(20, 200, 109, 0.6);
+      font-size: 18px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 18px;
+      font-size: 0.9rem;
+      color: #d7f4e4;
+    }
+
+    .nav-links a {
+      padding: 6px 10px;
+      border-radius: 999px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .nav-links a:hover {
+      background: rgba(15, 191, 107, 0.1);
+      color: #ffffff;
+    }
+
+    .btn-nav {
+      border-radius: var(--radius-pill);
+      padding: 7px 18px;
+      border: 1px solid rgba(130, 255, 200, 0.8);
+      font-size: 0.85rem;
+      background: linear-gradient(120deg, rgba(19, 214, 118, 0.15), transparent);
+      color: #e7fff3;
+      cursor: pointer;
+    }
+
+    /* HERO */
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2.5fr);
+      gap: 30px;
+      align-items: center;
+      margin-bottom: 40px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px 4px 4px;
+      border-radius: var(--radius-pill);
+      background: rgba(17, 79, 59, 0.9);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(73, 214, 149, 0.7);
+      font-size: 0.78rem;
+      color: #b4f7d5;
+      margin-bottom: 14px;
+    }
+
+    .pill-dot {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 0, #aaffdd 0, #29e37d 50%, #035f3f 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.1rem, 4vw, 2.8rem);
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+
+    .hero h1 span.accent {
+      color: #62ffb3;
+    }
+
+    .hero-subtitle {
+      color: #c3e8d3;
+      font-size: 0.95rem;
+      max-width: 460px;
+      margin-bottom: 18px;
+    }
+
+    .hero-cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .btn-primary {
+      border: none;
+      cursor: pointer;
+      border-radius: var(--radius-pill);
+      padding: 10px 22px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #04130c;
+      background: linear-gradient(135deg, #28ff9c, #13c86d);
+      box-shadow: 0 14px 30px rgba(6, 180, 91, 0.45);
+    }
+
+    .btn-ghost {
+      border-radius: var(--radius-pill);
+      padding: 9px 20px;
+      border: 1px solid rgba(171, 241, 204, 0.8);
+      background: transparent;
+      color: #c7ffe5;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 0.8rem;
+      color: #9ed1b3;
+      margin-top: 4px;
+    }
+
+    .hero-meta span strong {
+      color: #e6ffee;
+    }
+
+    /* HERO – CARD RIGHT */
+
+    .hero-card {
+      background: radial-gradient(circle at top, rgba(24, 199, 117, 0.45), rgba(1, 19, 13, 0.98));
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(124, 255, 197, 0.5);
+      padding: 18px 18px 20px;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, rgba(150, 255, 210, 0.4), transparent 55%);
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    .hero-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-card-header h2 {
+      font-size: 0.95rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #d8ffe9;
+    }
+
+    .status-pill {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      background: rgba(1, 32, 20, 0.85);
+      border: 1px solid rgba(164, 255, 210, 0.6);
+      color: #b8ffe0;
+    }
+
+    .hero-card-body {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-block {
+      background: rgba(1, 18, 12, 0.75);
+      border-radius: var(--radius-md);
+      padding: 10px 11px;
+      border: 1px solid rgba(114, 230, 174, 0.65);
+      font-size: 0.8rem;
+      color: #d7ffe8;
+    }
+
+    .card-block h3 {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9af3c8;
+      margin-bottom: 4px;
+    }
+
+    .kpi-main {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .kpi-main span {
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .kpi-sub {
+      font-size: 0.75rem;
+      color: #9bd5b1;
+    }
+
+    .mini-bars {
+      margin-top: 8px;
+      display: grid;
+      gap: 5px;
+    }
+
+    .mini-bar {
+      height: 6px;
+      border-radius: 99px;
+      background: rgba(16, 63, 42, 0.95);
+      overflow: hidden;
+    }
+
+    .mini-bar span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, #29ffa2, #0ba95d);
+    }
+
+    .card-list {
+      margin-top: 6px;
+      list-style: none;
+      font-size: 0.74rem;
+      color: #bfeeda;
+    }
+
+    .card-list li::before {
+      content: "• ";
+      color: #63ffb6;
+    }
+
+    .hero-badge-strip {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 0.72rem;
+      color: #b6f0cf;
+    }
+
+    .hero-badge-strip span {
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(1, 24, 15, 0.75);
+      border: 1px solid rgba(123, 231, 178, 0.6);
+    }
+
+    /* SECTIONS */
+
+    section {
+      margin-top: 40px;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+    }
+
+    .section-sub {
+      font-size: 0.9rem;
+      color: #b9e2c8;
+      margin-bottom: 18px;
+      max-width: 620px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .feature {
+      background: rgba(1, 21, 14, 0.9);
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(74, 199, 138, 0.7);
+      padding: 14px 14px 16px;
+      font-size: 0.85rem;
+      color: #def8eb;
+    }
+
+    .feature h3 {
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+    }
+
+    .feature p {
+      color: #a6d6be;
+      font-size: 0.82rem;
+    }
+
+    /* QUICK AUDIT FORM (DEMO) */
+
+    .audit-box {
+      margin-top: 22px;
+      background: rgba(2, 21, 13, 0.95);
+      border-radius: var(--radius-lg);
+      padding: 16px 16px 18px;
+      border: 1px solid rgba(120, 230, 177, 0.7);
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.2fr);
+      gap: 18px;
+      align-items: flex-start;
+    }
+
+    .audit-box h3 {
+      margin-bottom: 6px;
+    }
+
+    .audit-box p {
+      font-size: 0.82rem;
+      color: #b6e1c7;
+      margin-bottom: 10px;
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 0.78rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      margin-bottom: 2px;
+      color: #a5dabc;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 7px 9px;
+      border-radius: 9px;
+      border: 1px solid rgba(105, 187, 145, 0.8);
+      background: rgba(1, 17, 11, 0.9);
+      color: #e8fff2;
+      font-size: 0.8rem;
+    }
+
+    .col-half {
+      flex: 1 1 140px;
+    }
+
+    .btn-small {
+      margin-top: 6px;
+      padding: 7px 16px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(130deg, #24f29b, #0bbf66);
+      color: #04110a;
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .audit-result {
+      font-size: 0.8rem;
+      color: #d9ffec;
+    }
+
+    .audit-result h4 {
+      margin-bottom: 4px;
+    }
+
+    .audit-result ul {
+      margin-top: 3px;
+      list-style: none;
+    }
+
+    .audit-result li::before {
+      content: "▹ ";
+      color: #63ffb1;
+    }
+
+    /* FOOTER */
+
+    footer {
+      margin-top: 42px;
+      font-size: 0.75rem;
+      color: #8fb9a0;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      border-top: 1px solid rgba(71, 138, 104, 0.6);
+      padding-top: 14px;
+    }
+
+    @media (max-width: 880px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+      .hero-card {
+        order: -1;
+      }
+      .grid-3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .audit-box {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .nav {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <!-- NAV -->
+    <header class="nav">
+      <div class="logo">
+        <div class="logo-badge">⚡</div>
+        <span>EcoAudit</span>
+      </div>
+      <nav class="nav-links">
+        <a href="#how">How it works</a>
+        <a href="#features">Features</a>
+        <a href="#demo">Quick audit</a>
+        <button class="btn-nav">Sign in</button>
+      </nav>
+    </header>
+
+    <!-- HERO -->
+    <main>
+      <section class="hero">
+        <div>
+          <div class="pill">
+            <div class="pill-dot">🌱</div>
+            <span>Turn wasted energy into smart savings</span>
+          </div>
+
+          <h1>
+            Audit your <span class="accent">energy</span><br />
+            and cut waste in minutes.
+          </h1>
+
+          <p class="hero-subtitle">
+            EcoAudit is a smart assistant that turns a few building details into
+            a clear view of where you waste energy – and how to fix it.
+          </p>
+
+          <div class="hero-cta">
+            <button class="btn-primary" onclick="scrollToDemo()">Start free audit</button>
+            <button class="btn-ghost">Download report template</button>
+          </div>
+
+          <div class="hero-meta">
+            <span><strong>Up to 30% savings</strong> with basic actions.</span>
+            <span><strong>5‑minute</strong> input, instant feedback.</span>
+          </div>
+        </div>
+
+        <aside class="hero-card">
+          <div class="hero-card-header">
+            <h2>Live energy snapshot</h2>
+            <span class="status-pill">Demo building · Today</span>
+          </div>
+
+          <div class="hero-card-body">
+            <div class="card-block">
+              <h3>Annual footprint</h3>
+              <div class="kpi-main">23.4 MWh <span>· electricity</span></div>
+              <div class="kpi-sub">Estimated from your last bills and usage.</div>
+
+              <div class="mini-bars">
+                <div class="mini-bar">
+                  <span style="width: 72%"></span>
+                </div>
+                <div class="mini-bar">
+                  <span style="width: 48%; background: linear-gradient(90deg,#ffb54e,#ff6f3c)"></span>
+                </div>
+              </div>
+
+              <ul class="card-list">
+                <li>Heating &amp; cooling: 46% of total.</li>
+                <li>Lighting &amp; office loads: 28% of total.</li>
+              </ul>
+            </div>
+
+            <div class="card-block">
+              <h3>Waste focus</h3>
+              <div class="kpi-main">−18% <span>potential</span></div>
+              <div class="kpi-sub">If you apply 3 high‑impact measures.</div>
+              <ul class="card-list">
+                <li>Raise summer setpoint by 2&nbsp;°C.</li>
+                <li>Replace 60% of legacy lighting with LEDs.</li>
+                <li>Schedule HVAC off‑hours automatically.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="hero-badge-strip">
+            <span>● Paris‑aligned recommendations</span>
+            <span>● Designed for homes &amp; SMEs</span>
+            <span>● Exportable to Excel &amp; PDF</span>
+          </div>
+        </aside>
+      </section>
+
+      <!-- HOW IT WORKS -->
+      <section id="how">
+        <h2 class="section-title">How EcoAudit works</h2>
+        <p class="section-sub">
+          The app combines a simple questionnaire with engineering‑grade
+          reference data. In three steps you get a clear view on your biggest
+          sources of waste and what to do first.
+        </p>
+
+        <div class="grid-3">
+          <div class="feature">
+            <h3>1. Describe your site</h3>
+            <p>
+              Enter just the essentials: floor area, location, main equipment
+              and last energy bills. No need for detailed CAD drawings.
+            </p>
+          </div>
+
+          <div class="feature">
+            <h3>2. Model energy flows</h3>
+            <p>
+              A calculation engine estimates loads for lighting, HVAC, hot
+              water and plug loads using standard profiles and climate data.
+            </p>
+          </div>
+
+          <div class="feature">
+            <h3>3. Get actions &amp; savings</h3>
+            <p>
+              The tool ranks measures by impact and cost: from “free behavior
+              changes” to “CAPEX with short payback”.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- FEATURES -->
+      <section id="features">
+        <h2 class="section-title">Why teams like EcoAudit</h2>
+        <p class="section-sub">
+          Built for engineers, auditors and students who need quick but robust
+          answers when preparing an energy audit or efficiency roadmap.
+        </p>
+
+        <div class="grid-3">
+          <div class="feature">
+            <h3>Multi‑scenario</h3>
+            <p>
+              Compare baseline vs. retrofit scenarios, export side‑by‑side
+              charts and use them directly in your reports.
+            </p>
+          </div>
+          <div class="feature">
+            <h3>Localized data</h3>
+            <p>
+              Use climate‑aligned reference profiles and emission factors for
+              realistic savings and CO₂ impact.
+            </p>
+          </div>
+          <div class="feature">
+            <h3>Transparent math</h3>
+            <p>
+              Every recommendation links back to the underlying formula, so
+              your audit remains fully traceable.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- QUICK AUDIT DEMO -->
+      <section id="demo">
+        <h2 class="section-title">Try a 30‑second mini‑audit</h2>
+        <p class="section-sub">
+          This demo uses a simple heuristic model. In a real app you would plug
+          in your own calculation engine or API.
+        </p>
+
+        <div class="audit-box">
+          <div>
+            <h3>Input</h3>
+            <p>Fill a few fields and we’ll estimate possible savings.</p>
+
+            <div class="form-row">
+              <div class="col-half">
+                <label for="area">Floor area (m²)</label>
+                <input id="area" type="number" min="10" placeholder="e.g. 80" />
+              </div>
+              <div class="col-half">
+                <label for="electricity">Annual electricity (kWh)</label>
+                <input id="electricity" type="number" min="0" placeholder="e.g. 6000" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="col-half">
+                <label for="lighting">Lighting type</label>
+                <select id="lighting">
+                  <option value="mixed">Mostly CFL/LED</option>
+                  <option value="old">Many halogen / incandescent</option>
+                  <option value="led">Full LED</option>
+                </select>
+              </div>
+              <div class="col-half">
+                <label for="hvac">Cooling setpoint in summer (°C)</label>
+                <input id="hvac" type="number" min="18" max="30" placeholder="e.g. 22" />
+              </div>
+            </div>
+
+            <button class="btn-small" onclick="runAudit()">Estimate savings</button>
+          </div>
+
+          <div class="audit-result" id="auditResult">
+            <h3>Result</h3>
+            <p>Enter data then click “Estimate savings”.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>© 2026 EcoAudit – concept demo for energy‑efficiency projects.</span>
+      <span>Designed with a green‑first palette and clean typography.</span>
+    </footer>
+  </div>
+
+  <script>
+    function scrollToDemo() {
+      document.getElementById("demo").scrollIntoView({ behavior: "smooth" });
+    }
+
+    function runAudit() {
+      const area = Number(document.getElementById("area").value || 0);
+      const kWh = Number(document.getElementById("electricity").value || 0);
+      const lighting = document.getElementById("lighting").value;
+      const hvac = Number(document.getElementById("hvac").value || 0);
+
+      if (!area || !kWh) {
+        document.getElementById("auditResult").innerHTML =
+          "<h3>Result</h3><p>Please enter at least floor area and annual electricity.</p>";
+        return;
+      }
+
+      // Very simple heuristic model
+      let baseIntensity = kWh / area; // kWh/m²
+      let potential = 0;
+      let tips = [];
+
+      // Lighting
+      if (lighting === "old") {
+        potential += 0.12; // 12%
+        tips.push("Replace legacy halogen/incandescent lamps with LED.");
+      } else if (lighting === "mixed") {
+        potential += 0.06;
+        tips.push("Increase the share of LED to 100% of lighting.");
+      }
+
+      // Cooling set‑point
+      if (hvac && hvac < 25) {
+        const delta = 25 - hvac;
+        const extra = Math.min(0.04 * delta, 0.12); // 4%/°C, capped
+        potential += extra;
+        tips.push(
+          "Raise summer cooling set‑point closer to 25–26 °C to reduce HVAC consumption."
+        );
+      }
+
+      // Intensity‑based
+      if (baseIntensity > 90) {
+        potential += 0.1;
+        tips.push(
+          "Overall electricity intensity is high; investigate standby loads and schedules."
+        );
+      }
+
+      potential = Math.min(potential, 0.35); // cap at 35%
+      const savedKWh = Math.round(kWh * potential);
+      const newKWh = Math.round(kWh - savedKWh);
+
+      let html = `<h3>Result</h3>
+        <h4>Estimated potential: ${(potential * 100).toFixed(1)}% savings</h4>
+        <p>This corresponds to about <strong>${savedKWh} kWh/year</strong>, 
+        bringing your use down to ~<strong>${newKWh} kWh/year</strong>.</p>`;
+
+      if (tips.length) {
+        html += "<p>Key actions:</p><ul>";
+        tips.forEach((t) => {
+          html += `<li>${t}</li>`;
+        });
+        html += "</ul>";
+      } else {
+        html +=
+          "<p>Your inputs already look efficient. Deep audit needed for further savings.</p>";
+      }
+
+      document.getElementById("auditResult").innerHTML = html;
+    }
+  </script>
+</body>
+</html>
