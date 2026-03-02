@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EcoAudit Facture – Audit & Efficacité Énergétique</title>
+
+  <!-- Tesseract.js (OCR in-browser) -->
+  <script src="https://unpkg.com/tesseract.js@6.0.1/dist/tesseract.min.js"></script>
+
+  <style>
+    :root{
+      --bg0:#041b16;
+      --bg1:#06261d;
+      --card: rgba(2, 25, 15, .88);
+      --card2: rgba(2, 21, 13, .72);
+      --border: rgba(120, 230, 177, .55);
+      --txt:#e9fff3;
+      --muted:#a6d6be;
+      --muted2:#7fb79c;
+      --g1:#28ff9c;
+      --g2:#13c86d;
+      --g3:#035f3f;
+      --warn:#ffb54e;
+      --danger:#ff5b5b;
+      --shadow: 0 18px 40px rgba(0,0,0,.25);
+      --r-lg:18px;
+      --r-md:12px;
+      --r-pill:999px;
+    }
+
+    *{ box-sizing:border-box; margin:0; padding:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+    body{
+      color:var(--txt);
+      background: radial-gradient(circle at top left, #0a4a35 0, #03110d 55%, #000 100%);
+      min-height:100vh;
+      line-height:1.55;
+    }
+    a{ color:inherit; text-decoration:none; }
+    .page{ max-width:1120px; margin:0 auto; padding:22px 16px 46px; }
+
+    /* Top bar */
+    .nav{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:14px; margin-bottom:18px;
+    }
+    .brand{ display:flex; align-items:center; gap:10px; }
+    .logo{
+      width:36px; height:36px; border-radius:12px;
+      background: radial-gradient(circle at 30% 0, #82ffd3 0, var(--g2) 50%, var(--g3) 100%);
+      box-shadow: 0 0 18px rgba(20, 200, 109, .55);
+      display:grid; place-items:center;
+    }
+    .brand h1{ font-size:1rem; letter-spacing:.06em; text-transform:uppercase; }
+    .brand p{ font-size:.78rem; color:#c9f2dc; margin-top:2px; }
+    .nav-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+    .btn{
+      cursor:pointer;
+      border-radius: var(--r-pill);
+      padding: 9px 14px;
+      border: 1px solid rgba(171, 241, 204, .7);
+      background: rgba(1, 17, 11, .2);
+      color: var(--txt);
+      font-size: .85rem;
+    }
+    .btn.primary{
+      border: none;
+      background: linear-gradient(135deg, var(--g1), var(--g2));
+      color:#04130c;
+      font-weight:700;
+      box-shadow: 0 14px 30px rgba(6, 180, 91, 0.35);
+    }
+    .btn.ghost{
+      background: transparent;
+      border: 1px solid rgba(171,241,204,.6);
+      color:#d7ffe8;
+    }
+
+    /* Layout */
+    .hero{
+      display:grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr);
+      gap:18px;
+      align-items:start;
+      margin-top:10px;
+    }
+    .card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+    .card .hd{
+      padding:14px 14px 0;
+      display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+    }
+    .card .hd h2{
+      font-size:1.02rem;
+      letter-spacing:.04em;
+    }
+    .badge{
+      font-size:.75rem;
+      padding: 4px 10px;
+      border-radius: var(--r-pill);
+      border: 1px solid rgba(164,255,210,.55);
+      background: rgba(1, 24, 15, .65);
+      color:#b8ffe0;
+      white-space:nowrap;
+    }
+    .card .bd{ padding:12px 14px 14px; }
+
+    .intro p{ color:#c3e8d3; font-size:.92rem; max-width:70ch; margin-top:8px; }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      border-radius: var(--r-pill);
+      padding: 4px 12px 4px 6px;
+      border:1px solid rgba(73,214,149,.55);
+      background: rgba(17, 79, 59, .85);
+      color:#b4f7d5;
+      font-size:.78rem;
+      margin-bottom:10px;
+    }
+    .pill .dot{
+      width:26px; height:26px; border-radius:50%;
+      display:grid; place-items:center;
+      background: radial-gradient(circle at 30% 0, #aaffdd 0, #29e37d 50%, #035f3f 100%);
+      font-size:14px;
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+
+    .mini{
+      background: var(--card2);
+      border: 1px solid rgba(114, 230, 174, 0.5);
+      border-radius: var(--r-md);
+      padding:10px;
+    }
+    .mini h3{ font-size:.84rem; color:#bdf7d8; margin-bottom:6px; letter-spacing:.05em; text-transform:uppercase;}
+    .mini p{ color:var(--muted); font-size:.82rem; }
+
+    /* Upload area */
+    .drop{
+      border: 1.5px dashed rgba(171,241,204,.65);
+      border-radius: var(--r-md);
+      padding:12px;
+      background: rgba(1, 17, 11, .35);
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .drop .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between;}
+    input[type="file"]{ width:100%; color:#dfffee; font-size:.84rem; }
+    .hint{ color:var(--muted2); font-size:.78rem; }
+    .progress{
+      height:10px; background: rgba(8, 70, 45, .75);
+      border-radius: 999px; overflow:hidden;
+      border:1px solid rgba(120,230,177,.35);
+    }
+    .progress > div{ height:100%; width:0%; background: linear-gradient(90deg, var(--g1), var(--g2)); transition:width .2s; }
+
+    /* Preview */
+    .preview{
+      display:grid; gap:10px;
+    }
+    .preview img{
+      width:100%; max-height:280px; object-fit:contain;
+      background: rgba(255,255,255,.03);
+      border-radius: var(--r-md);
+      border:1px solid rgba(120,230,177,.25);
+    }
+    .mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size:.78rem;
+      color:#d8ffe9;
+      white-space:pre-wrap;
+      background: rgba(0,0,0,.35);
+      border:1px solid rgba(120,230,177,.22);
+      border-radius: var(--r-md);
+      padding:10px;
+      max-height:220px;
+      overflow:auto;
+    }
+
+    /* Form */
+    .form{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    label{ display:block; font-size:.76rem; color:#a5dabc; margin-bottom:3px; }
+    input, select, textarea{
+      width:100%;
+      padding:9px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(105, 187, 145, 0.75);
+      background: rgba(1, 17, 11, 0.88);
+      color: #e8fff2;
+      font-size:.86rem;
+      outline:none;
+    }
+    textarea{ min-height:86px; resize:vertical; }
+    .full{ grid-column: 1 / -1; }
+
+    /* Results */
+    .kpis{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap:10px;
+      margin-top:10px;
+    }
+    .kpi{
+      background: rgba(1, 18, 12, 0.72);
+      border: 1px solid rgba(114, 230, 174, 0.45);
+      border-radius: var(--r-md);
+      padding:10px;
+    }
+    .kpi .t{ font-size:.74rem; color:#9af3c8; text-transform:uppercase; letter-spacing:.08em; }
+    .kpi .v{ font-size:1.12rem; font-weight:800; margin-top:4px; }
+    .kpi .s{ font-size:.78rem; color:var(--muted); margin-top:2px; }
+
+    .list{
+      margin-top:10px;
+      display:grid; gap:8px;
+    }
+    .item{
+      padding:10px;
+      border-radius: var(--r-md);
+      background: rgba(1, 18, 12, .62);
+      border: 1px solid rgba(120,230,177,.28);
+    }
+    .item h4{ font-size:.92rem; margin-bottom:4px; }
+    .item p{ font-size:.84rem; color:#c9f2dc; }
+    .tag{
+      display:inline-block;
+      font-size:.72rem;
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid rgba(171,241,204,.45);
+      background: rgba(15,191,107,.12);
+      color:#b8ffe0;
+      margin-right:6px;
+      margin-top:6px;
+    }
+    .tag.warn{ border-color: rgba(255,181,78,.55); background: rgba(255,181,78,.12); color:#ffe7c7; }
+    .tag.bad{ border-color: rgba(255,91,91,.55); background: rgba(255,91,91,.10); color:#ffe0e0; }
+
+    /* Report printable */
+    #report{
+      margin-top:16px;
+      background: rgba(255,255,255,.04);
+      border:1px solid rgba(120,230,177,.25);
+      border-radius: var(--r-lg);
+      overflow:hidden;
+    }
+    .report-hd{
+      padding:12px 14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+      border-bottom:1px solid rgba(120,230,177,.18);
+      background: rgba(1, 24, 15, .55);
+    }
+    .report-hd h3{ font-size:1rem; }
+    .report-bd{ padding:12px 14px 16px; color:#eafff2; }
+    .report-bd h4{ margin-top:10px; margin-bottom:6px; }
+    .report-bd p, .report-bd li{ color:#d7ffe8; font-size:.88rem; }
+    .report-bd ul{ padding-left:18px; display:grid; gap:4px; }
+    .report-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+    .box{
+      border:1px solid rgba(120,230,177,.22);
+      background: rgba(0,0,0,.22);
+      border-radius: var(--r-md);
+      padding:10px;
+    }
+    .small{ font-size:.82rem; color:#bfeeda; }
+
+    footer{
+      margin-top:22px;
+      color:#8fb9a0;
+      font-size:.78rem;
+      border-top:1px solid rgba(71,138,104,.35);
+      padding-top:12px;
+      display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    }
+
+    @media (max-width: 920px){
+      .hero{ grid-template-columns: 1fr; }
+      .kpis{ grid-template-columns: 1fr; }
+      .form{ grid-template-columns: 1fr; }
+      .report-grid{ grid-template-columns: 1fr; }
+    }
+
+    /* Print styles */
+    @media print{
+      body{ background:#fff; color:#000; }
+      .nav, .hero, footer, .btn, .badge, .drop, .preview, #rawOCRWrap{ display:none !important; }
+      .page{ max-width: none; padding: 0; }
+      #report{ border:none; }
+      .report-hd{ background:#fff; border-bottom: 1px solid #ddd; }
+      .report-bd{ color:#000; }
+      .report-bd p, .report-bd li{ color:#000; }
+      .box{ border:1px solid #ddd; background:#fff; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <header class="nav">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <!-- small inline illustration -->
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M13 2L3 14h8l-1 8 11-14h-8l0-6z" stroke="rgba(0,0,0,.85)" stroke-width="1.6" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <h1>EcoAudit Facture</h1>
+          <p>Analyse de facture → indicateurs → recommandations → rapport imprimable</p>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <button class="btn ghost" id="btnReset">Réinitialiser</button>
+        <button class="btn primary" id="btnPrint">Imprimer / PDF</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <!-- Left -->
+      <div class="card intro">
+        <div class="hd">
+          <div>
+            <div class="pill"><span class="dot">📄</span><span>Facture énergétique (image) + OCR + audit rapide</span></div>
+            <h2>1) Importer la facture &amp; lancer l’analyse</h2>
+            <p>
+              Dépose une facture (photo JPG/PNG). L’OCR extrait les grandeurs essentielles
+              (kWh, période, montant, index, puissance si disponible) puis génère un rapport
+              avec des pistes d’amélioration. (Tu peux corriger les champs détectés.)
+            </p>
+          </div>
+          <span class="badge" id="statusBadge">Prêt</span>
+        </div>
+
+        <div class="bd">
+          <div class="drop">
+            <div class="row">
+              <div style="min-width:240px; flex:1">
+                <label for="file">Facture (image JPG/PNG ou PDF)</label>
+                <input id="file" type="file" accept=".png,.jpg,.jpeg,.pdf,image/*,application/pdf" />
+                <div class="hint">Conseil: photo nette, bien éclairée, sans perspective.</div>
+              </div>
+              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <button class="btn primary" id="btnOCR">Analyser (OCR)</button>
+                <button class="btn" id="btnAutoFill">Auto‑remplir (à partir OCR)</button>
+              </div>
+            </div>
+
+            <div class="progress" aria-label="progress">
+              <div id="prog"></div>
+            </div>
+            <div class="hint" id="logLine">Aucune analyse en cours.</div>
+          </div>
+
+          <div class="grid2" style="margin-top:12px;">
+            <div class="preview">
+              <div class="mini">
+                <h3>Prévisualisation</h3>
+                <p>Si tu importes une image, elle s’affiche ici.</p>
+              </div>
+              <img id="imgPreview" alt="Prévisualisation facture" style="display:none;" />
+            </div>
+
+            <div id="rawOCRWrap">
+              <div class="mini">
+                <h3>Texte OCR (brut)</h3>
+                <p>Utile si tu veux vérifier ce que l’OCR a lu.</p>
+              </div>
+              <div class="mono" id="ocrText">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right -->
+      <div class="card">
+        <div class="hd">
+          <div>
+            <h2>2) Vérifier les grandeurs</h2>
+            <p class="hint">Ces champs servent à calculer les indicateurs de l’audit.</p>
+          </div>
+          <span class="badge">Étape 2/3</span>
+        </div>
+
+        <div class="bd">
+          <div class="form">
+            <div>
+              <label>Période (début)</label>
+              <input id="periodStart" placeholder="ex: 01/01/2026" />
+            </div>
+            <div>
+              <label>Période (fin)</label>
+              <input id="periodEnd" placeholder="ex: 31/01/2026" />
+            </div>
+
+            <div>
+              <label>Consommation (kWh)</label>
+              <input id="kwh" type="number" step="0.01" placeholder="ex: 350" />
+            </div>
+            <div>
+              <label>Montant total (MAD)</label>
+              <input id="amount" type="number" step="0.01" placeholder="ex: 620" />
+            </div>
+
+            <div>
+              <label>Index ancien</label>
+              <input id="idxOld" type="number" step="1" placeholder="ex: 12458" />
+            </div>
+            <div>
+              <label>Index nouveau</label>
+              <input id="idxNew" type="number" step="1" placeholder="ex: 12808" />
+            </div>
+
+            <div>
+              <label>Puissance (kVA ou kW)</label>
+              <input id="power" type="number" step="0.1" placeholder="ex: 6" />
+            </div>
+            <div>
+              <label>Type de site</label>
+              <select id="siteType">
+                <option value="logement">Logement</option>
+                <option value="bureau">Bureau</option>
+                <option value="atelier">Atelier / petite industrie</option>
+              </select>
+            </div>
+
+            <div class="full">
+              <label>Notes (optionnel)</label>
+              <textarea id="notes" placeholder="ex: chauffage électrique, clim en été, horaires d'ouverture, etc."></textarea>
+            </div>
+
+            <div class="full" style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn primary" id="btnCompute">Générer l’audit & le rapport</button>
+              <button class="btn" id="btnComputeFromIndex">Calculer kWh depuis index (nouveau − ancien)</button>
+            </div>
+          </div>
+
+          <div class="kpis" id="kpiWrap" style="display:none;">
+            <div class="kpi">
+              <div class="t">Coût moyen</div>
+              <div class="v" id="kpiCost">—</div>
+              <div class="s">MAD/kWh (si kWh & montant fournis)</div>
+            </div>
+            <div class="kpi">
+              <div class="t">Conso journalière</div>
+              <div class="v" id="kpiDaily">—</div>
+              <div class="s">kWh/jour (si période lisible)</div>
+            </div>
+            <div class="kpi">
+              <div class="t">Estimation puissance moyenne</div>
+              <div class="v" id="kpiAvgP">—</div>
+              <div class="s">kW (approx.)</div>
+            </div>
+          </div>
+
+          <div class="list" id="recoWrap" style="display:none;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REPORT -->
+    <section id="report" class="card" style="margin-top:18px; display:none;">
+      <div class="report-hd">
+        <div>
+          <h3>Rapport d’audit énergétique (préliminaire)</h3>
+          <div class="small" id="reportMeta">—</div>
+        </div>
+        <span class="badge">Imprimable</span>
+      </div>
+
+      <div class="report-bd" id="reportBody">
+        <!-- filled by JS -->
+      </div>
+    </section>
+
+    <footer>
+      <span>EcoAudit Facture – prototype pédagogique (audit & efficacité énergétique).</span>
+      <span>Astuce: pour exporter en PDF, utiliser “Imprimer” → “Enregistrer en PDF”.</span>
+    </footer>
+  </div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  const state = {
+    file: null,
+    imageDataUrl: null,
+    ocrText: "",
+    extracted: {}
+  };
+
+  function setStatus(text){
+    $("statusBadge").textContent = text;
+  }
+  function setLog(text){
+    $("logLine").textContent = text;
+  }
+  function setProg(p){
+    $("prog").style.width = `${Math.max(0, Math.min(100, p))}%`;
+  }
+
+  function formatNum(x, digits=2){
+    if (x === null || x === undefined || x === "" || isNaN(Number(x))) return "—";
+    return Number(x).toFixed(digits);
+  }
+
+  function daysBetween(d1, d2){
+    // expects DD/MM/YYYY or YYYY-MM-DD
+    function parse(s){
+      if(!s) return null;
+      s = s.trim();
+      if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return new Date(s+"T00:00:00");
+      const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+      if(!m) return null;
+      const [_, dd, mm, yyyy] = m;
+      return new Date(`${yyyy}-${mm.padStart(2,"0")}-${dd.padStart(2,"0")}T00:00:00`);
+    }
+    const a = parse(d1), b = parse(d2);
+    if(!a || !b) return null;
+    const diff = (b - a) / (1000*60*60*24);
+    if(!isFinite(diff) || diff <= 0) return null;
+    return Math.round(diff);
+  }
+
+  // --- OCR helpers ---
+  function normalizeText(t){
+    return (t || "")
+      .replace(/\u00A0/g, " ")
+      .replace(/[|]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function findNumberNear(text, keywords){
+    // Very simple heuristic: find first number within ~40 chars after keyword
+    const t = text.toLowerCase();
+    for (const kw of keywords){
+      const idx = t.indexOf(kw);
+      if (idx >= 0){
+        const slice = text.slice(idx, idx + 80);
+        // number patterns: 1234, 1234.56, 1 234,56
+        const m = slice.match(/([0-9]{1,3}(?:[ .][0-9]{3})*(?:[.,][0-9]{1,2})?|[0-9]+(?:[.,][0-9]{1,2})?)/);
+        if (m){
+          const raw = m[1].replace(/ /g,"").replace(/,/g,".");
+          const val = Number(raw);
+          if (isFinite(val)) return val;
+        }
+      }
+    }
+    return null;
+  }
+
+  function findDateRange(text){
+    // Looks for two dates in DD/MM/YYYY
+    const m = text.match(/(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}).{0,40}?(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/);
+    if (!m) return {start:null, end:null};
+    return {start:m[1], end:m[2]};
+  }
+
+  function extractFromOCR(rawText){
+    const t = normalizeText(rawText);
+    const lower = t.toLowerCase();
+
+    const kwh = findNumberNear(t, ["kwh", "k w h", "consommation", "énergie", "energie"]);
+    const amount = findNumberNear(t, ["total", "ttc", "montant", "à payer", "a payer", "net à payer", "net a payer"]);
+    const idxOld = findNumberNear(t, ["index ancien", "ancien index", "index: ancien", "ancien"]);
+    const idxNew = findNumberNear(t, ["index nouveau", "nouvel index", "nouveau", "actuel", "index: nouveau"]);
+    const power = findNumberNear(t, ["puissance", "kva", "kw"]);
+    const period = findDateRange(t);
+
+    // Confidence note: if kWh missing but indexes found, derive
+    const derivedKwh = (idxOld !== null && idxNew !== null && idxNew >= idxOld) ? (idxNew - idxOld) : null;
+
+    return {
+      periodStart: period.start,
+      periodEnd: period.end,
+      kwh: kwh ?? derivedKwh,
+      amount: amount,
+      idxOld: idxOld,
+      idxNew: idxNew,
+      power: power
+    };
+  }
+
+  async function runOCRFromImageDataUrl(dataUrl){
+    setStatus("OCR…");
+    setLog("OCR en cours (ça peut prendre 10–60s selon PC) …");
+    setProg(5);
+
+    const worker = await Tesseract.createWorker({
+      logger: m => {
+        if (m && m.status){
+          const pct = m.progress ? Math.round(m.progress * 100) : null;
+          if (pct !== null) setProg(Math.min(95, 5 + pct*0.9));
+          setLog(`${m.status}${pct !== null ? " · " + pct + "%" : ""}`);
+        }
+      }
+    });
+
+    try{
+      await worker.load();
+      await worker.loadLanguage("fra");
+      await worker.initialize("fra");
+      const { data: { text } } = await worker.recognize(dataUrl);
+      await worker.terminate();
+
+      setProg(100);
+      setStatus("OCR terminé");
+      setLog("OCR terminé. Vérifie/corrige les champs puis génère le rapport.");
+
+      return text || "";
+    } catch(err){
+      setStatus("Erreur OCR");
+      setLog("Erreur OCR. Essaie une image plus nette ou recadre.");
+      setProg(0);
+      try{ await worker.terminate(); }catch(e){}
+      throw err;
+    }
+  }
+
+  function showPreviewIfImage(file){
+    if (!file) return;
+    const isImage = file.type.startsWith("image/");
+    if (!isImage){
+      $("imgPreview").style.display = "none";
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      state.imageDataUrl = reader.result;
+      $("imgPreview").src = state.imageDataUrl;
+      $("imgPreview").style.display = "block";
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // --- Audit / Recommendations ---
+  function buildRecommendations({kwh, days, siteType, costPerKwh}){
+    const recos = [];
+
+    // Simple heuristics (prototype)
+    if (kwh !== null && days !== null){
+      const daily = kwh / days;
+
+      if (siteType === "logement"){
+        if (daily > 12){
+          recos.push({
+            title: "Surconsommation potentielle (logement)",
+            level: "bad",
+            text: "Votre consommation journalière semble élevée. Vérifiez chauffe‑eau électrique, clim/chauffage, et appareils en veille."
+          });
+        } else if (daily > 7){
+          recos.push({
+            title: "Optimisation simple",
+            level: "warn",
+            text: "Passez en LED, coupez les veilles (multiprise), et optimisez l’utilisation du chauffe‑eau (timer)."
+          });
+        } else {
+          recos.push({
+            title: "Bon niveau de consommation",
+            level: "ok",
+            text: "Le niveau global semble correct. Pour aller plus loin: mesurer les veilles et optimiser la consigne de clim/chauffage."
+          });
+        }
+      }
+
+      if (siteType === "bureau"){
+        if (daily > 30){
+          recos.push({
+            title: "Horaires & veilles (bureau)",
+            level: "bad",
+            text: "Consommation élevée. Priorité: extinction automatique hors horaires (PC, imprimantes, éclairage, clim)."
+          });
+        } else {
+          recos.push({
+            title: "Pilotage & éclairage",
+            level: "warn",
+            text: "Installer détecteurs de présence, optimiser la consigne de clim, et suivre la conso par zones."
+          });
+        }
+      }
+
+      if (siteType === "atelier"){
+        recos.push({
+          title: "Mesurer par sous‑comptage",
+          level: "warn",
+          text: "Mettre un sous‑comptage (moteurs, air comprimé, éclairage) pour isoler les postes énergivores."
+        });
+      }
+    }
+
+    recos.push({
+      title: "Éclairage",
+      level: "ok",
+      text: "Remplacer les lampes halogènes/incandescentes par LED et ajouter capteurs dans zones peu occupées."
+    });
+    recos.push({
+      title: "Climatisation / Chauffage",
+      level: "ok",
+      text: "Consigne recommandée: 24–26°C en été, 19–20°C en hiver. Entretenir filtres et éviter les infiltrations d’air."
+    });
+    recos.push({
+      title: "Veilles & usages",
+      level: "ok",
+      text: "Réduire les veilles (box, TV, PC), utiliser multiprises à interrupteur, programmer chauffe‑eau/pompes."
+    });
+
+    if (costPerKwh !== null && costPerKwh > 2.0){
+      recos.push({
+        title: "Coût/kWh élevé",
+        level: "warn",
+        text: "Le coût moyen par kWh semble élevé. Vérifiez les taxes, la tranche tarifaire et les pénalités éventuelles."
+      });
+    }
+
+    return recos;
+  }
+
+  function renderRecommendations(recos){
+    const wrap = $("recoWrap");
+    wrap.innerHTML = "";
+    recos.forEach(r => {
+      const div = document.createElement("div");
+      div.className = "item";
+      const tagClass = r.level === "bad" ? "bad" : (r.level === "warn" ? "warn" : "");
+      const tagLabel = r.level === "bad" ? "Priorité haute" : (r.level === "warn" ? "Priorité moyenne" : "Bonne pratique");
+      div.innerHTML = `
+        <h4>${r.title}</h4>
+        <p>${r.text}</p>
+        <span class="tag ${tagClass}">${tagLabel}</span>
+      `;
+      wrap.appendChild(div);
+    });
+    wrap.style.display = "grid";
+  }
+
+  function generateReport(data, recos){
+    const now = new Date();
+    const meta = `Généré le ${now.toLocaleString("fr-FR")} · Type de site: ${data.siteType}`;
+    $("reportMeta").textContent = meta;
+
+    const lines = [];
+    lines.push(`<div class="report-grid">`);
+    lines.push(`<div class="box">
+      <strong>Informations facture</strong><br/>
+      <span class="small">Période:</span> ${data.periodStart || "—"} → ${data.periodEnd || "—"}<br/>
+      <span class="small">Consommation:</span> ${data.kwh !== null ? data.kwh + " kWh" : "—"}<br/>
+      <span class="small">Montant:</span> ${data.amount !== null ? data.amount + " MAD" : "—"}<br/>
+      <span class="small">Index ancien/nouveau:</span> ${data.idxOld ?? "—"} → ${data.idxNew ?? "—"}<br/>
+      <span class="small">Puissance:</span> ${data.power ?? "—"}<br/>
+    </div>`);
+
+    lines.push(`<div class="box">
+      <strong>Indicateurs clés</strong><br/>
+      <span class="small">Durée estimée:</span> ${data.days ?? "—"} jours<br/>
+      <span class="small">Conso/jour:</span> ${data.dailyKwh !== null ? data.dailyKwh.toFixed(2) + " kWh/j" : "—"}<br/>
+      <span class="small">Coût moyen:</span> ${data.costPerKwh !== null ? data.costPerKwh.toFixed(2) + " MAD/kWh" : "—"}<br/>
+      <span class="small">Puissance moyenne (approx):</span> ${data.avgPowerKw !== null ? data.avgPowerKw.toFixed(2) + " kW" : "—"}<br/>
+    </div>`);
+    lines.push(`</div>`);
+
+    lines.push(`<h4>Observations</h4>`);
+    lines.push(`<p>${data.observation}</p>`);
+
+    if (data.notes && data.notes.trim()){
+      lines.push(`<h4>Contexte / Notes</h4>`);
+      lines.push(`<p>${escapeHtml(data.notes).replace(/\n/g,"<br/>")}</p>`);
+    }
+
+    lines.push(`<h4>Recommandations (plan d’actions)</h4>`);
+    lines.push(`<ul>`);
+    recos.forEach(r => lines.push(`<li><strong>${escapeHtml(r.title)}:</strong> ${escapeHtml(r.text)}</li>`));
+    lines.push(`</ul>`);
+
+    lines.push(`<h4>Prochaines étapes (audit approfondi)</h4>`);
+    lines.push(`<ul>
+      <li>Collecter 6–12 mois de factures pour analyser la saisonnalité.</li>
+      <li>Faire un relevé des équipements (puissance, horaires, état, maintenance).</li>
+      <li>Installer un suivi (compteur/IoT) pour identifier les postes dominants.</li>
+    </ul>`);
+
+    $("reportBody").innerHTML = lines.join("");
+    $("report").style.display = "block";
+  }
+
+  function escapeHtml(s){
+    return (s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function computeAudit(){
+    const periodStart = $("periodStart").value.trim() || null;
+    const periodEnd = $("periodEnd").value.trim() || null;
+
+    const kwhVal = $("kwh").value;
+    const amountVal = $("amount").value;
+    const idxOldVal = $("idxOld").value;
+    const idxNewVal = $("idxNew").value;
+    const powerVal = $("power").value;
+
+    const kwh = kwhVal !== "" ? Number(kwhVal) : null;
+    const amount = amountVal !== "" ? Number(amountVal) : null;
+    const idxOld = idxOldVal !== "" ? Number(idxOldVal) : null;
+    const idxNew = idxNewVal !== "" ? Number(idxNewVal) : null;
+    const power = powerVal !== "" ? Number(powerVal) : null;
+
+    const siteType = $("siteType").value;
+    const notes = $("notes").value;
+
+    const days = (periodStart && periodEnd) ? daysBetween(periodStart, periodEnd) : null;
+
+    const costPerKwh = (kwh !== null && amount !== null && kwh > 0) ? (amount / kwh) : null;
+    const dailyKwh = (kwh !== null && days !== null && days > 0) ? (kwh / days) : null;
+    const avgPowerKw = (dailyKwh !== null) ? (dailyKwh / 24) : null; // average kW approx.
+
+    // Observation text
+    let observation = "Analyse basée sur les informations fournies. Corriger les champs si nécessaire pour fiabiliser le rapport.";
+    if (kwh === null && (idxOld !== null && idxNew !== null)){
+      observation = "La consommation (kWh) a été déduite des index (nouveau − ancien). Vérifiez les index relevés et l’unité du compteur.";
+    }
+    if (days === null){
+      observation += " La période n’est pas lisible → certains indicateurs (kWh/jour) sont estimés ou non calculés.";
+    }
+
+    // KPIs render
+    $("kpiWrap").style.display = "grid";
+    $("kpiCost").textContent = costPerKwh !== null ? `${formatNum(costPerKwh,2)} MAD/kWh` : "—";
+    $("kpiDaily").textContent = dailyKwh !== null ? `${formatNum(dailyKwh,2)} kWh/j` : "—";
+    $("kpiAvgP").textContent = avgPowerKw !== null ? `${formatNum(avgPowerKw,2)} kW` : "—";
+
+    const recos = buildRecommendations({kwh, days, siteType, costPerKwh});
+    renderRecommendations(recos);
+
+    generateReport({
+      periodStart, periodEnd, kwh, amount, idxOld, idxNew, power,
+      siteType, notes, days, costPerKwh, dailyKwh, avgPowerKw,
+      observation
+    }, recos);
+
+    setStatus("Rapport prêt");
+  }
+
+  // --- Events ---
+  $("file").addEventListener("change", (e) => {
+    const f = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+    state.file = f;
+    state.imageDataUrl = null;
+    $("ocrText").textContent = "—";
+    setProg(0);
+    if (f){
+      setStatus("Fichier chargé");
+      setLog(`Fichier: ${f.name} (${Math.round(f.size/1024)} Ko)`);
+      showPreviewIfImage(f);
+      if (f.type === "application/pdf"){
+        setLog("PDF détecté: pour l’OCR, utilise de préférence une image (PNG/JPG) exportée depuis le PDF.");
+      }
+    } else {
+      setStatus("Prêt");
+      setLog("Aucun fichier sélectionné.");
+    }
+  });
+
+  $("btnOCR").addEventListener("click", async () => {
+    if (!state.file){
+      alert("Choisis d’abord une facture (image).");
+      return;
+    }
+    if (!state.file.type.startsWith("image/")){
+      alert("Pour l’OCR, merci d’utiliser une image (PNG/JPG). Si tu as un PDF, exporte-le en image d’abord.");
+      return;
+    }
+    try{
+      const text = await runOCRFromImageDataUrl(state.imageDataUrl);
+      state.ocrText = text;
+      $("ocrText").textContent = text || "—";
+      state.extracted = extractFromOCR(text);
+      setStatus("Champs détectés");
+    } catch(err){
+      console.error(err);
+      alert("OCR échoué. Essaie une photo plus nette ou recadrée.");
+    }
+  });
+
+  $("btnAutoFill").addEventListener("click", () => {
+    const ex = state.extracted || {};
+    if (!Object.keys(ex).length){
+      alert("Pas de données OCR disponibles. Lance d’abord l’analyse OCR.");
+      return;
+    }
+    if (ex.periodStart) $("periodStart").value = ex.periodStart;
+    if (ex.periodEnd) $("periodEnd").value = ex.periodEnd;
+    if (ex.kwh !== null && ex.kwh !== undefined) $("kwh").value = ex.kwh;
+    if (ex.amount !== null && ex.amount !== undefined) $("amount").value = ex.amount;
+    if (ex.idxOld !== null && ex.idxOld !== undefined) $("idxOld").value = Math.round(ex.idxOld);
+    if (ex.idxNew !== null && ex.idxNew !== undefined) $("idxNew").value = Math.round(ex.idxNew);
+    if (ex.power !== null && ex.power !== undefined) $("power").value = ex.power;
+    setStatus("Auto‑rempli");
+    setLog("Champs remplis depuis OCR. Vérifie puis génère le rapport.");
+  });
+
+  $("btnComputeFromIndex").addEventListener("click", () => {
+    const oldV = $("idxOld").value, newV = $("idxNew").value;
+    if (oldV === "" || newV === ""){
+      alert("Saisis d’abord Index ancien et Index nouveau.");
+      return;
+    }
+    const oldN = Number(oldV), newN = Number(newV);
+    if (!isFinite(oldN) || !isFinite(newN) || newN < oldN){
+      alert("Index invalides. Vérifie les valeurs.");
+      return;
+    }
+    $("kwh").value = (newN - oldN);
+    setStatus("kWh calculé");
+    setLog("kWh = index nouveau − index ancien (vérifier l’unité du compteur).");
+  });
+
+  $("btnCompute").addEventListener("click", () => {
+    computeAudit();
+  });
+
+  $("btnPrint").addEventListener("click", () => {
+    // Print report only makes sense after generating it
+    if ($("report").style.display === "none"){
+      alert("Génère d’abord le rapport (bouton “Générer l’audit & le rapport”).");
+      return;
+    }
+    window.print();
+  });
+
+  $("btnReset").addEventListener("click", () => {
+    location.reload();
+  });
+</script>
+</body>
+</html>
